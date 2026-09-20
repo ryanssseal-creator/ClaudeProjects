@@ -4,7 +4,7 @@
  * Return the sum of two numbers.
  */
 function add(a, b) {
-  // TODO
+  return a + b;
 }
 
 /**
