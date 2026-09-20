@@ -11,7 +11,9 @@ function add(a, b) {
  * Return str reversed.
  */
 function reverseString(str) {
-  // TODO
+  const array = str.split('');
+  const reversed = array.reverse();
+  return reversed.join('');
 }
 
 /**
