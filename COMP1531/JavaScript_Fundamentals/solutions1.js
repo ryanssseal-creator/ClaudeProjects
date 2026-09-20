@@ -14,7 +14,6 @@ function reverseString(str) {
   const array = str.split('');
   const reversed = array.reverse();
   return reversed.join('');
-  
 }
 
 /**
