@@ -20,7 +20,11 @@ function reverseString(str) {
  * Return the largest number in an array. Return undefined if empty.
  */
 function largest(nums) {
-  // TODO
+  if (nums.length === 0) {
+    return undefined;
+  }
+  const sorted = nums.toSorted();
+  return sorted[sorted.length];
 }
 
 /**
@@ -28,14 +32,14 @@ function largest(nums) {
  * e.g. { a: 1, b: 2 } -> { a: 2, b: 4 }
  */
 function doubleValues(obj) {
-  // TODO
+  return obj.forEach((x) => 2 * x);
 }
 
 /**
  * Return true if str is a palindrome (ignore case, letters only).
  */
 function isPalindrome(str) {
-  // TODO
+  
 }
 
 /**
