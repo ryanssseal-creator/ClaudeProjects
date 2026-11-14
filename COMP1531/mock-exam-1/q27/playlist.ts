@@ -1,4 +1,28 @@
-let songs = [];
+type Song = {
+  songId: number;
+  title: string;
+  artist: string;
+  durationSeconds: number;
+  liked: boolean;
+};
+
+type SongDetails = {
+  title: string;
+  artist: string;
+  durationSeconds: number;
+};
+
+type SongId = {
+  songId: number;
+};
+
+type ErrorMessage = {
+  error: string;
+};
+
+type EmptyResponse = Record<string, never>;
+
+let songs: Song[] = [];
 
 /**
  * Find a song with the given title in the playlist
@@ -6,8 +30,8 @@ let songs = [];
  * @returns {?} If the song exists, it returns the song object that includes
  * songId(number), title(string), artist(string), durationSeconds(number) and liked(boolean).
  */
-export function findSong(title: number) {
-  return songs.find((s) => s.title === title);
+export function findSong(title: string): Song | undefined {
+  return songs.find(s => s.title === title);
 }
 
 /**
@@ -17,15 +41,15 @@ export function findSong(title: number) {
  * @returns {songId Object} - returns the songId as the number in the object,
  * or an error object that includes error(string).
  */
-export function addSong(details): number {
+export function addSong(details: SongDetails): SongId | ErrorMessage {
   if (details.durationSeconds <= 0) {
-    return { error: "Duration must be positive" }
+    return { error: 'Duration must be positive' };
   }
   if (findSong(details.title)) {
     return { error: 'Song already exists' };
   }
 
-  let songId = songs.length + 1;
+  const songId = songs.length + 1;
   const newSong = {
     songId: songId,
     title: details.title,
@@ -43,8 +67,8 @@ export function addSong(details): number {
  * @param {boolean} liked - whether the song should be marked as liked
  * @returns {} - empty object, or an error object that includes error(string).
  */
-export function setLiked(songId: string, liked){
-  const song = songs.find((s) => s.songId == songId);
+export function setLiked(songId: number, liked: boolean): EmptyResponse | ErrorMessage {
+  const song = songs.find(s => s.songId === songId);
   if (!song) {
     return { error: 'Invalid song Id' };
   }
@@ -56,15 +80,15 @@ export function setLiked(songId: string, liked){
  * Total duration of all liked songs
  * @returns {number} - the total duration, in seconds
  */
-export function likedDuration(): string {
-  return songs.filter((s) => s.liked).reduce((total, s) => total + s.durationSeconds, 0);
+export function likedDuration(): number {
+  return songs.filter(s => s.liked).reduce((total, s) => total + s.durationSeconds, 0);
 }
 
 /**
  * clear the playlist
  * @returns {}
  */
-export function clear() {
+export function clear(): EmptyResponse {
   songs = [];
   return {};
 }
