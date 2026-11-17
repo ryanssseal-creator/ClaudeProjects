@@ -1,11 +1,10 @@
 // DO NOT MODIFY THE FUNCTION DEFINITIONS
 
 /**
- * Adds up the values stored under a given key across an array of objects.
- * An object that does not have the key contributes 0.
+ * Returns the sum of the values stored under a given key in an array of objects.
  *
  * @param {Object[]} arr - Array of objects.
- * @param {string} key - The key whose values should be added up.
+ * @param {string} key - The key whose values are added up.
  * @returns {number} - The total.
  *
  * @example
@@ -16,49 +15,45 @@ export function sumBy(arr, key) {
 }
 
 /**
- * Splits an array into two arrays using a test function (the predicate).
- * The first array holds the elements for which predicate(element) is true,
- * the second holds the rest. Both keep the original order.
- * The input array is not modified.
+ * Returns the last n elements of an array, in their original order.
+ * If n is larger than the length of the array, the whole array is returned.
  *
- * @param {any[]} arr - Array to split.
- * @param {Function} predicate - Function that takes an element and returns true or false.
- * @returns {any[][]} - [elementsThatPass, elementsThatFail]
+ * @param {any[]} arr - The array.
+ * @param {number} n - How many elements to take from the end.
+ * @returns {any[]} - Array of the last n elements.
  *
  * @example
- * partition([1, 2, 3, 4], n => n % 2 === 0) // => [[2, 4], [1, 3]]
+ * lastN([1, 2, 3, 4], 2) // => [3, 4]
  */
-export function partition(arr, predicate) {
+export function lastN(arr, n) {
   // TODO
 }
 
 /**
- * Combines two objects of numeric counts into a new object.
- * The result has every key from both objects. Where a key is in both,
- * the two values are added together. Neither input object is modified.
+ * Creates a copy of an object with one of its keys renamed.
  *
- * @param {Object} a - First object of counts.
- * @param {Object} b - Second object of counts.
- * @returns {Object} - New merged object.
+ * @param {Object} obj - Original object.
+ * @param {string} oldKey - The key to rename.
+ * @param {string} newKey - The new name for the key.
+ * @returns {Object} - New object with the key renamed.
  *
  * @example
- * mergeCounts({ x: 1, y: 2 }, { y: 3, z: 4 }) // => { x: 1, y: 5, z: 4 }
+ * renameKey({ a: 1, b: 2 }, 'a', 'z') // => { z: 1, b: 2 }
  */
-export function mergeCounts(a, b) {
+export function renameKey(obj, oldKey, newKey) {
   // TODO
 }
 
 /**
- * Decides whether two strings are anagrams of each other: made of exactly
- * the same letters, the same number of times each. Case and spaces are ignored.
+ * Checks whether a string reads the same forwards and backwards.
+ * Upper and lower case letters are treated as the same letter.
  *
- * @param {string} a - First string.
- * @param {string} b - Second string.
- * @returns {boolean} - true if they are anagrams, false otherwise.
+ * @param {string} str - The input string.
+ * @returns {boolean} - true if it is a palindrome, false otherwise.
  *
  * @example
- * isAnagram('Listen', 'Silent') // => true
+ * isPalindrome("Racecar") // => true
  */
-export function isAnagram(a, b) {
+export function isPalindrome(str) {
   // TODO
 }

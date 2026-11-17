@@ -1,8 +1,7 @@
 // SOLUTION - Mock Exam 1, Q30 Part 2
 //
-// The hint in the spec: reuse Part 1. Every input that covered a line in cinema.ts will
-// cover the same line when sent over HTTP. The sold-out case also covers the catch block
-// in server.ts.
+// The hint in the spec: reuse Part 1. Every input that covered a line in entry.ts
+// covers the same line when it is sent over HTTP instead.
 import { describe, test, expect } from 'vitest';
 import request from 'sync-request-curl';
 
@@ -10,43 +9,38 @@ import config from './config.json' with { type: "json" };
 
 const SERVER_URL = `${config.url}:${config.port}`;
 
-const adult = { age: 30, student: false, member: false };
-const friday = { basePrice: 20, day: 'friday', format: '2d', soldOut: false };
+const guest = { name: 'ryan', status: 'member', ticket: 'none' };
+const venue = { blocked: [] as string[], hosts: [] as string[], guestList: [] as string[], membersNight: false };
 
-function priceRequest(customer: typeof adult, session: typeof friday) {
-  const res = request('POST', SERVER_URL + '/cinema/price', {
-    json: { customer, session }
+function entryRequest(g: typeof guest, v: typeof venue) {
+  const res = request('POST', SERVER_URL + '/events/entry', {
+    json: { guest: g, venue: v }
   });
-  return { status: res.statusCode, body: res.getJSON() };
+  return res.getJSON();
 }
 
 describe('tests', () => {
-  test('sold out -> 400 (covers the catch block)', () => {
-    expect(priceRequest(adult, { ...friday, soldOut: true }))
-      .toStrictEqual({ status: 400, body: { error: 'Session is sold out' } });
+  test('banned guest', () => {
+    expect(entryRequest({ ...guest, status: 'banned' }, venue)).toBe(false);
   });
 
-  test('plain adult', () => {
-    expect(priceRequest(adult, friday)).toStrictEqual({ status: 200, body: { price: 20 } });
+  test('blocked by the venue', () => {
+    expect(entryRequest(guest, { ...venue, blocked: ['ryan'] })).toBe(false);
   });
 
-  test('child, 3d', () => {
-    expect(priceRequest({ ...adult, age: 10 }, { ...friday, format: '3d' }))
-      .toStrictEqual({ status: 200, body: { price: 14 } });
+  test('vip ticket', () => {
+    expect(entryRequest({ ...guest, ticket: 'vip' }, venue)).toBe(true);
   });
 
-  test('student on a weekday', () => {
-    expect(priceRequest({ ...adult, student: true }, friday))
-      .toStrictEqual({ status: 200, body: { price: 16 } });
+  test('member with a general ticket on members night', () => {
+    expect(entryRequest({ ...guest, ticket: 'general' }, { ...venue, membersNight: true })).toBe(true);
   });
 
-  test('member on tuesday', () => {
-    expect(priceRequest({ ...adult, member: true }, { ...friday, day: 'tuesday' }))
-      .toStrictEqual({ status: 200, body: { price: 10 } });
+  test('member on the guest list', () => {
+    expect(entryRequest(guest, { ...venue, guestList: ['ryan'] })).toBe(true);
   });
 
-  test('member on another day', () => {
-    expect(priceRequest({ ...adult, member: true }, friday))
-      .toStrictEqual({ status: 200, body: { price: 18 } });
+  test('member with nothing special', () => {
+    expect(entryRequest(guest, venue)).toBe(false);
   });
 });

@@ -6,76 +6,70 @@
 
 | Marks | For |
 |---|---|
-| 1 | An endpoint to book a room, taking a date, start time and end time (story 1) |
-| 1 | An endpoint to see a room's existing bookings for a date (story 2) |
-| 1 | An endpoint to list the logged-in student's own bookings (story 3) |
-| 1 | An endpoint to cancel a booking (story 4) |
-| 1 | Invalid operations rejected with named errors (story 5): overlap, longer than 2 hours, not your booking. All three for the mark; 0.5 for one or two. |
-| 1 | Admins can cancel any booking (story 6): either the same cancel endpoint with the rule stated explicitly, or a separate admin endpoint that returns 403 for non-admins. |
+| 1 | An endpoint to book a room (story 1) |
+| 1 | An endpoint to release a room (story 2) |
+| 1 | An endpoint to search rooms by minimum capacity (story 3) |
+| 2 | Invalid operations are rejected with named errors (story 4): already booked, and releasing a room you did not book. 1 mark each. |
+| 1 | Every new endpoint requires a session (story 5). Sessions only come from UNSW single-sign-on via `/auth/login`, so requiring one is what guarantees the user is UNSW staff or a student. Must be stated or shown on every endpoint (a 401 error on each is enough). |
 
 **Proper use of HTTP (4 marks)**
 
 | Marks | For |
 |---|---|
-| 1 | Sensible methods: POST to create a booking, GET to read, DELETE to cancel. No GET that changes state, no body on GET. |
-| 1 | Sensible, consistent resource paths that fit the existing API (bookings nested under `/room/{roomId}` or a top-level `/booking/{bookingId}`), ids in the path, the date filter in the query string, session in the header. |
-| 1 | Status codes distinguish the cases: 400 bad input / clash, 401 invalid session, 403 logged in but not allowed (someone else's booking and not an admin). |
+| 1 | Sensible methods: POST/PUT to book, DELETE (or POST/PUT) to release, GET to search. No GET that changes state. |
+| 1 | Sensible, consistent paths that fit the existing API (built on `/room/{roomId}`), with ids as path parameters, the capacity filter in the query string, session in the header. No body on GET. |
+| 1 | Status codes used correctly and consistently with the existing API: 400 for invalid operations/ids, 401 for invalid session. |
 | 1 | Each endpoint states its inputs, its success response and its errors clearly enough to implement. |
 
-A design that only lists bare paths with no inputs, responses or errors gets at most 4/10.
+Deduct nothing for formatting. A design that only lists bare paths with no inputs, responses
+or errors gets at most 4/10.
 
 ## Sample design
 
-### POST /room/{roomId}/bookings
+### POST /room/{roomId}/booking
 
-Book the room for the logged-in student.
-
-- Path: `roomId`
-- Header: `session`
-- Body: `{ "date": "2026-11-20", "startTime": "14:00", "endTime": "15:30" }`
-- 200: `{ "bookingId": 5678 }`
-- 400:
-  - `INVALID_ROOM_ID` roomId does not refer to a room
-  - `INVALID_TIME` date or times are malformed, or endTime is not after startTime
-  - `BOOKING_TOO_LONG` the booking is longer than 2 hours
-  - `TIME_UNAVAILABLE` the time overlaps an existing booking for this room
-- 401: `UNAUTHORISED`
-
-### GET /room/{roomId}/bookings
-
-List the bookings for a room on a date, so a student can see which times are taken.
+Book the room for the logged-in user.
 
 - Path: `roomId`
-- Header: `session`
-- Query: `date`, e.g. `/room/1234/bookings?date=2026-11-20`
-- 200: `[ { "bookingId": 5678, "startTime": "14:00", "endTime": "15:30" } ]`
-- 400: `INVALID_ROOM_ID`, `INVALID_DATE`
-- 401: `UNAUTHORISED`
-
-### GET /bookings
-
-List the logged-in student's own bookings.
-
-- Header: `session`
-- 200: `[ { "bookingId": 5678, "roomId": 1234, "roomName": "K17 113", "date": "2026-11-20", "startTime": "14:00", "endTime": "15:30" } ]`
-- 401: `UNAUTHORISED`
-
-### DELETE /booking/{bookingId}
-
-Cancel a booking. A student can cancel only their own bookings. An admin can cancel any booking.
-
-- Path: `bookingId`
 - Header: `session`
 - 200: `{}`
-- 400: `INVALID_BOOKING_ID` bookingId does not refer to a booking
+- 400:
+  - `INVALID_ROOM_ID` roomId does not refer to an existing room
+  - `ALREADY_BOOKED` the room is already booked
+- 401: `UNAUTHORISED` session is empty or invalid
+
+### DELETE /room/{roomId}/booking
+
+Release the logged-in user's booking of the room.
+
+- Path: `roomId`
+- Header: `session`
+- 200: `{}`
+- 400:
+  - `INVALID_ROOM_ID` roomId does not refer to an existing room
+  - `NOT_BOOKED_BY_USER` the logged-in user does not hold the booking for this room
 - 401: `UNAUTHORISED`
-- 403: `FORBIDDEN` the booking belongs to another user and the session's role is not `ADMIN`
+
+### GET /rooms/search
+
+Search for rooms that hold at least a given number of people.
+
+- Header: `session`
+- Query: `minCapacity`, e.g. `/rooms/search?minCapacity=4`
+- 200: `[ { "roomId": 1234, "name": "K17 113", "capacity": 6, "booked": false } ]`
+- 400: `INVALID_CAPACITY` minCapacity is not a positive number
+- 401: `UNAUTHORISED`
+
+### Story 5
+
+Every endpoint above requires a valid `session` and returns 401 without one. A session can
+only be obtained from `/auth/login`, which authenticates against UNSW single-sign-on, so
+every user of the system is a UNSW student or staff member.
 
 ### Why this design
 
-- Who is acting always comes from the session, never from a zid in the body. That is what
-  makes "not your booking" enforceable.
-- One DELETE endpoint covers stories 4 and 6. The difference between a student and an admin
-  is an authorisation rule (403), not a different URL.
-- The date filter is a query parameter on a GET, because it narrows a read and changes nothing.
-- 401 vs 403: 401 means we don't know who you are; 403 means we do, and you're not allowed.
+- The user is identified by the session, never by a zid in the body. That is what makes
+  "a room I did not book" checkable.
+- Book and release are the same resource with different methods: POST creates the
+  booking, DELETE removes it.
+- Search is a GET with a query string, because it reads data and changes nothing.

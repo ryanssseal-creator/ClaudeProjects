@@ -2,7 +2,7 @@ import express, { json, Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import config from './config.json' with { type: "json" };
-import { clear, reportItem, searchItems, getItem, claimItem, removeItem, removeClaimed } from './lostFound.ts';
+import { clear, addNewBook, getBooksByGenre, getBooksByIds, updateBookCopiesById, updateAllBookCopies } from './books.ts';
 
 const PORT: number = parseInt(process.env.PORT || config.port);
 const HOST: string = process.env.IP || '127.0.0.1';
@@ -22,81 +22,73 @@ app.use(morgan('dev'));
 
 // SOLUTION - Mock Exam 2, Q29
 //
-// Every route: 1. read + convert inputs, 2. call the backend, 3. send error or result.
-// The status code lookup is shared, so it lives in one helper (DRY).
-
-function statusFor(error: string): number {
-  // Wrong role is a permissions problem (403). Everything else here is bad input (400).
-  return error === 'INVALID_ROLE' ? 403 : 400;
-}
+// The pattern for every route is the same three steps:
+//   1. pull the inputs out of the request (body / query / params / headers), converting types
+//   2. call the backend function
+//   3. if it returned an error, send it with the right status code; otherwise send the result
 
 app.delete('/clear', (req: Request, res: Response) => {
   res.json(clear());
 });
 
-app.post('/item', (req: Request, res: Response) => {
-  const { description, location } = req.body;
+app.post('/book/add', (req: Request, res: Response) => {
+  const { title, genre, copies } = req.body;
 
-  const result = reportItem(description, location);
+  const result = addNewBook(title, genre, copies);
   if ('error' in result) {
-    return res.status(statusFor(result.error)).json(result);
+    // Send the backend's error object straight through.
+    return res.status(400).json(result);
   }
   res.json(result);
 });
 
-// ORDER MATTERS: '/item/search' must be registered BEFORE '/item/:itemid',
-// otherwise Express treats the word 'search' as an itemid.
-app.get('/item/search', (req: Request, res: Response) => {
-  // GET has no body: the keyword is in the query string.
-  const keyword = req.query.keyword as string;
+app.get('/book/filter', (req: Request, res: Response) => {
+  // GET requests have no body. The data is in the query string.
+  const genre = req.query.genre as string;
 
-  const result = searchItems(keyword);
+  const result = getBooksByGenre(genre);
   if ('error' in result) {
-    return res.status(statusFor(result.error)).json(result);
+    return res.status(400).json(result);
   }
   res.json(result);
 });
 
-app.get('/item/:itemid', (req: Request, res: Response) => {
-  // Path parameters are strings. The backend compares with ===, so convert.
-  const itemId = parseInt(req.params.itemid as string);
+app.get('/book/list', (req: Request, res: Response) => {
+  // Query values are always strings: '0,2,1' -> ['0', '2', '1'] -> [0, 2, 1]
+  const bookIds = (req.query.bookIds as string).split(',').map(id => parseInt(id));
 
-  const result = getItem(itemId);
+  const result = getBooksByIds(bookIds);
   if ('error' in result) {
-    return res.status(statusFor(result.error)).json(result);
+    return res.status(400).json(result);
   }
   res.json(result);
 });
 
-app.put('/item/:itemid/claim', (req: Request, res: Response) => {
-  const itemId = parseInt(req.params.itemid as string);
-  const { zid } = req.body;
-
-  const result = claimItem(itemId, zid);
-  if ('error' in result) {
-    return res.status(statusFor(result.error)).json(result);
-  }
-  res.json(result);
-});
-
-// ORDER MATTERS again: '/item/claimed' before '/item/:itemid'.
-app.delete('/item/claimed', (req: Request, res: Response) => {
+// ORDER MATTERS: this must be registered BEFORE '/book/:bookid'.
+// Express uses the first route that matches, and ':bookid' matches the word 'all'.
+app.put('/book/all', (req: Request, res: Response) => {
   const role = req.headers.role as string;
+  const { extraCopies } = req.body;
 
-  const result = removeClaimed(role);
+  const result = updateAllBookCopies(role, extraCopies);
   if ('error' in result) {
-    return res.status(statusFor(result.error)).json(result);
+    // Wrong role is a permissions problem (403), everything else is bad input (400).
+    const status = result.error === 'INVALID_ROLE' ? 403 : 400;
+    return res.status(status).json(result);
   }
   res.json(result);
 });
 
-app.delete('/item/:itemid', (req: Request, res: Response) => {
+app.put('/book/:bookid', (req: Request, res: Response) => {
   const role = req.headers.role as string;
-  const itemId = parseInt(req.params.itemid as string);
+  // Path parameters are strings too.
+  const bookId = parseInt(req.params.bookid as string);
+  const { copies } = req.body;
 
-  const result = removeItem(role, itemId);
+  const result = updateBookCopiesById(role, bookId, copies);
   if ('error' in result) {
-    return res.status(statusFor(result.error)).json(result);
+    const status = result.error === 'INVALID_ROLE' ? 403 : 400;
+    return res.status(status).json(result);
   }
   res.json(result);
 });

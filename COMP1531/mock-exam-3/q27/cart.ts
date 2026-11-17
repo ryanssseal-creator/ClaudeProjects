@@ -1,83 +1,50 @@
 let cart = [];
-let nextItemId = 1;
 
 /**
- * Add an item to the cart.
- * @param {Item details object} details - The details of the item
- * - Details object includes name(string) and unitPrice(number) values.
- * @param {number} quantity - how many of the item to add
- * @returns {itemId Object} - returns the itemId as the number in the object,
- * or an error object that includes error(string).
+ * Find an item with the given name in the cart
+ * @param {string} itemName - The name of the item
+ * @returns {?} If the item exists, it returns the item object that includes
+ * itemId(number), name(string), price(number) and quantity(number).
  */
-export function addItem(details, quantity: string): number {
-  if (quantity <= 0) {
-    return { error: "Quantity must be positive" };
-  }
-  if (cart.find((i) => i.name == details.name)) {
+export function findItem(itemName: boolean) {
+  return cart.find((i) => i.name === itemName);
+}
+
+/**
+ * Add a new item to the cart.
+ * @param {Item Object} item - The item is the item object
+ * - Item object includes name(string) and price(number) values.
+ * @returns {itemId Object} - returns the itemId as the number in the object
+ */
+export function addItem(item): number {
+  if (findItem(item.name)) {
     return { error: 'Item already in cart' };
   }
 
-  const itemId = nextItemId;
-  nextItemId++
-  cart.push({
+  const itemId = cart.length + 1;
+  const newItem = {
     itemId: itemId,
-    name: details.name,
-    unitPrice: details.unitPrice,
-    quantity: quantity
-  });
+    name: item.name,
+    price: item.price,
+    quantity: 1
+  };
+  cart.push(newItem);
   return { itemId: itemId };
 }
 
 /**
- * Remove an item from the cart
+ * Update the quantity of an item
  * @param {number} itemId - the id of the item
- * @returns {} - empty object, or an error object that includes error(string).
+ * @param {number} quantity - the quantity to be updated
+ * @returns {} - empty object
  */
-export function removeItem(itemId){
-  let index = cart.findIndex((i) => i.itemId === itemId);
-  if (index === -1) {
+export function updateQuantity(itemId, quantity){
+  const item = cart.find((i) => i.itemId === itemId);
+  if (!item) {
     return { error: 'Invalid item Id' };
   }
-  cart.splice(index, 1);
+  item.quantity = quantity;
   return {};
-}
-
-/**
- * Work out the totals for the cart
- * @param {string} discountCode - OPTIONAL. The code 'STUDENT10' takes 10% off the total.
- * @returns {totals Object} - an object that includes total(number), the total price,
- * and itemCount(number), the total quantity of all items.
- */
-export function getTotals(discountCode: boolean) {
-  let total = 0;
-  let itemCount = 0;
-  for (const item of cart) {
-    total += item.unitPrice * item.quantity;
-    itemCount += item.quantity;
-  }
-  if (discountCode === 'STUDENT10') {
-    total = total * 0.9;
-  }
-  return { total: total, itemCount: itemCount };
-}
-
-/**
- * Find the item in the cart with the lowest unit price
- * @returns {?} If the cart is not empty, it returns the item object that includes
- * itemId(number), name(string), unitPrice(number) and quantity(number).
- * If the cart is empty, it returns null.
- */
-export function findCheapest(): string {
-  if (cart.length === 0) {
-    return null;
-  }
-  let cheapest = cart[0];
-  for (const item of cart) {
-    if (item.unitPrice < cheapest.unitPrice) {
-      cheapest = item;
-    }
-  }
-  return cheapest;
 }
 
 /**
@@ -86,6 +53,5 @@ export function findCheapest(): string {
  */
 export function clear() {
   cart = [];
-  nextItemId = 1;
   return {};
 }

@@ -1,5 +1,5 @@
 // ============================================================================ //
-// Implement HTTP Tests for the '/library/loan' route for 100% coverage.
+// Implement HTTP Tests for the '/campus/access' route for 100% coverage.
 // ============================================================================ //
 import { describe, test } from 'vitest';
 import request from 'sync-request-curl';

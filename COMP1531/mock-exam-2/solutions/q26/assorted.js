@@ -2,45 +2,42 @@
 
 export function intersection(a, b) {
   const result = [];
+  // `of` gives the values. `in` would give the indices as strings.
   for (const item of a) {
-    // in b, and not already added
-    if (b.includes(item) && !result.includes(item)) {
+    if (b.includes(item)) {
       result.push(item);
     }
   }
   return result;
 }
 
-export function rotate(arr, k) {
-  if (arr.length === 0) {
-    return [];
+export function flatten(arr) {
+  const result = [];
+  for (const inner of arr) {
+    for (const item of inner) {
+      result.push(item);
+    }
   }
-  // Rotating by the full length changes nothing, so only the remainder matters.
-  const shift = k % arr.length;
-  // slice never modifies the original array (unlike pop/shift/reverse/sort/splice).
-  const end = arr.slice(arr.length - shift);
-  const start = arr.slice(0, arr.length - shift);
-  return [...end, ...start];
+  return result;
 }
 
 export function invert(obj) {
   const result = {};
   for (const [key, value] of Object.entries(obj)) {
-    // Square brackets: use the VALUE of `value` as the new key.
+    // Square brackets: use the VALUE stored in `value` as the new key.
+    // result.value would create a key literally called "value".
     result[value] = key;
   }
   return result;
 }
 
-export function toCamelCase(str) {
+export function initials(str) {
   const words = str.split(' ');
-  const converted = words.map((word, index) => {
-    const lower = word.toLowerCase();
-    if (index === 0) {
-      return lower;
-    }
-    // charAt(0) is safe on an empty string (returns ''), unlike word[0].toUpperCase().
-    return lower.charAt(0).toUpperCase() + lower.slice(1);
-  });
-  return converted.join('');
+  let result = '';
+  for (const word of words) {
+    // charAt(0) is safe on an empty string (it gives ''), unlike word[0].toUpperCase().
+    // Strings can't be changed in place, so build up a new one and RETURN it.
+    result += word.charAt(0).toUpperCase();
+  }
+  return result;
 }

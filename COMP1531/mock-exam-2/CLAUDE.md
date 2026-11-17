@@ -39,7 +39,7 @@ Only these files are collected. Everything else is replaced with the original be
 | Q27 | `q27/tasks.ts` |
 | Q28 | `q28/enrolment.ts` |
 | Q29 | `q29/server.ts` |
-| Q30 | `q30/grades.test.ts` `q30/server.test.ts` |
+| Q30 | `q30/refunds.test.ts` `q30/server.test.ts` |
 | Q31 | `q31/design.md` |
 
 ## Setup

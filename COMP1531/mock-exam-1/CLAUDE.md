@@ -39,7 +39,7 @@ Only these files are collected. Everything else is replaced with the original be
 | Q27 | `q27/playlist.ts` |
 | Q28 | `q28/parcel.ts` |
 | Q29 | `q29/server.ts` |
-| Q30 | `q30/cinema.test.ts` `q30/server.test.ts` |
+| Q30 | `q30/entry.test.ts` `q30/server.test.ts` |
 | Q31 | `q31/design.md` |
 
 ## Setup

@@ -3,7 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import config from './config.json' with { type: "json" };
-import { gradeService } from './grades.ts';
+import { refundService } from './refunds.ts';
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -18,15 +18,11 @@ app.use(morgan('dev'));
 
 ///////////////////////////////////////////////////////////////////////////////
 
-app.post('/grades/final', (req: Request, res: Response) => {
-  const { student, assessment } = req.body;
+app.post('/store/refund', (req: Request, res: Response) => {
+  const { customer, order } = req.body;
+  const result = refundService(customer, order);
 
-  if (!student || !assessment) {
-    return res.status(400).json({ error: 'A student and an assessment are both required' });
-  }
-
-  const grade = gradeService(student, assessment);
-  res.json({ grade });
+  res.json(result);
 });
 
 ///////////////////////////////////////////////////////////////////////////////

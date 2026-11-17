@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest';
 import {
   sumBy,
-  partition,
-  mergeCounts,
-  isAnagram,
+  lastN,
+  renameKey,
+  isPalindrome,
 } from './assorted';
 
 describe('sumBy', () => {
@@ -15,8 +15,8 @@ describe('sumBy', () => {
     expect(sumBy([{ a: 1, b: 10 }, { a: 2, b: 20 }], 'b')).toBe(30);
   });
 
-  test('objects without the key contribute 0', () => {
-    expect(sumBy([{ marks: 5 }, { name: 'x' }, { marks: 1 }], 'marks')).toBe(6);
+  test('single object', () => {
+    expect(sumBy([{ marks: 9 }], 'marks')).toBe(9);
   });
 
   test('returns 0 for an empty array', () => {
@@ -24,85 +24,56 @@ describe('sumBy', () => {
   });
 });
 
-describe('partition', () => {
-  test('splits into passing and failing elements', () => {
-    expect(partition([1, 2, 3, 4], n => n % 2 === 0)).toStrictEqual([[2, 4], [1, 3]]);
+describe('lastN', () => {
+  test('returns the last n elements in order', () => {
+    expect(lastN([1, 2, 3, 4], 2)).toEqual([3, 4]);
+    expect(lastN([1, 2, 3, 4, 5], 1)).toEqual([5]);
   });
 
-  test('works with strings and keeps order', () => {
-    expect(partition(['bob', 'alexandra', 'li', 'christopher'], s => s.length > 3))
-      .toStrictEqual([['alexandra', 'christopher'], ['bob', 'li']]);
+  test('returns empty array for empty input', () => {
+    expect(lastN([], 3)).toEqual([]);
   });
 
-  test('everything passes', () => {
-    expect(partition([1, 2], () => true)).toStrictEqual([[1, 2], []]);
+  test('handles n larger than the array', () => {
+    expect(lastN([1, 2], 5)).toEqual([1, 2]);
   });
 
-  test('nothing passes', () => {
-    expect(partition([1, 2], () => false)).toStrictEqual([[], [1, 2]]);
-  });
-
-  test('handles an empty array', () => {
-    expect(partition([], () => true)).toStrictEqual([[], []]);
-  });
-
-  test('does not modify the input', () => {
-    const input = [3, 1, 2];
-    partition(input, n => n > 1);
-    expect(input).toStrictEqual([3, 1, 2]);
+  test('handles n equal to the length', () => {
+    expect(lastN([1, 2, 3], 3)).toEqual([1, 2, 3]);
   });
 });
 
-describe('mergeCounts', () => {
-  test('adds shared keys and keeps the rest', () => {
-    expect(mergeCounts({ x: 1, y: 2 }, { y: 3, z: 4 })).toStrictEqual({ x: 1, y: 5, z: 4 });
+describe('renameKey', () => {
+  test('renames the key and keeps its value', () => {
+    expect(renameKey({ a: 1, b: 2 }, 'a', 'z')).toEqual({ z: 1, b: 2 });
   });
 
-  test('no shared keys', () => {
-    expect(mergeCounts({ a: 1 }, { b: 2 })).toStrictEqual({ a: 1, b: 2 });
+  test('returns same object if the key does not exist', () => {
+    expect(renameKey({ a: 1 }, 'x', 'y')).toEqual({ a: 1 });
   });
 
-  test('keeps counts of 0', () => {
-    expect(mergeCounts({ a: 0 }, { a: 0, b: 0 })).toStrictEqual({ a: 0, b: 0 });
-  });
-
-  test('works with empty objects', () => {
-    expect(mergeCounts({}, {})).toStrictEqual({});
-    expect(mergeCounts({ a: 1 }, {})).toStrictEqual({ a: 1 });
-  });
-
-  test('does not modify the inputs', () => {
-    const a = { x: 1 };
-    const b = { x: 2 };
-    mergeCounts(a, b);
-    expect(a).toStrictEqual({ x: 1 });
-    expect(b).toStrictEqual({ x: 2 });
+  test('works with empty object', () => {
+    expect(renameKey({}, 'a', 'b')).toEqual({});
   });
 });
 
-describe('isAnagram', () => {
-  test('simple anagram', () => {
-    expect(isAnagram('listen', 'silent')).toBe(true);
+describe('isPalindrome', () => {
+  test('simple palindromes', () => {
+    expect(isPalindrome('racecar')).toBe(true);
+    expect(isPalindrome('noon')).toBe(true);
   });
 
-  test('ignores case', () => {
-    expect(isAnagram('Listen', 'SILENT')).toBe(true);
+  test('not palindromes', () => {
+    expect(isPalindrome('hello')).toBe(false);
+    expect(isPalindrome('ab')).toBe(false);
   });
 
-  test('ignores spaces', () => {
-    expect(isAnagram('dormitory', 'dirty room')).toBe(true);
+  test('ignores capitalisation', () => {
+    expect(isPalindrome('Racecar')).toBe(true);
   });
 
-  test('different letters', () => {
-    expect(isAnagram('abc', 'abd')).toBe(false);
-  });
-
-  test('same letters, different counts', () => {
-    expect(isAnagram('aab', 'abb')).toBe(false);
-    expect(isAnagram('aa', 'a')).toBe(false);
-  });
-
-  test('two empty strings', () => {
-    expect(isAnagram('', '')).toBe(true);
+  test('handles empty string and single letters', () => {
+    expect(isPalindrome('')).toBe(true);
+    expect(isPalindrome('a')).toBe(true);
   });
 });

@@ -1,8 +1,7 @@
 // SOLUTION - Mock Exam 3, Q30 Part 2
 //
-// Reuse the Part 1 inputs over HTTP. Statement coverage needs every line run once,
-// so one request per `return` in loans.ts is enough. A refused loan also covers the
-// 403 line in server.ts, and an approved one covers the 200 line.
+// The hint in the spec: reuse Part 1. Every input that covered a line in access.ts
+// covers the same line when it is sent over HTTP instead.
 import { describe, test, expect } from 'vitest';
 import request from 'sync-request-curl';
 
@@ -10,42 +9,38 @@ import config from './config.json' with { type: "json" };
 
 const SERVER_URL = `${config.url}:${config.port}`;
 
-const onTime = { title: 'Clean Code', overdue: false };
-const student = { type: 'student', suspended: false, loans: [onTime] };
-const book = { reference: false, copiesAvailable: 2, highDemand: false };
+const user = { zid: 'z5555555', role: 'student', building: 'K17', bookings: [] as string[] };
+const door = { room: 'G02', building: 'J17', locked: false, owners: [] as string[], afterHours: false };
 
-function loanRequest(member: typeof student, item: typeof book) {
-  const res = request('POST', SERVER_URL + '/library/loan', {
-    json: { member, item }
+function accessRequest(u: typeof user, d: typeof door) {
+  const res = request('POST', SERVER_URL + '/campus/access', {
+    json: { user: u, door: d }
   });
-  return { status: res.statusCode, body: res.getJSON() };
+  return res.getJSON();
 }
 
 describe('tests', () => {
-  test('suspended -> 403', () => {
-    expect(loanRequest({ ...student, suspended: true }, book))
-      .toStrictEqual({ status: 403, body: { approved: false, reason: 'SUSPENDED' } });
+  test('visitor', () => {
+    expect(accessRequest({ ...user, role: 'visitor' }, door)).toBe(false);
   });
 
-  test('limit reached -> 403', () => {
-    const loans = [onTime, onTime, onTime, onTime, onTime];
-    expect(loanRequest({ ...student, loans }, book))
-      .toStrictEqual({ status: 403, body: { approved: false, reason: 'LIMIT_REACHED' } });
+  test('locked door', () => {
+    expect(accessRequest(user, { ...door, locked: true })).toBe(false);
   });
 
-  test('overdue -> 403', () => {
-    const loans = [{ title: 'Refactoring', overdue: true }];
-    expect(loanRequest({ ...student, loans }, book))
-      .toStrictEqual({ status: 403, body: { approved: false, reason: 'OVERDUE_ITEM' } });
+  test('security', () => {
+    expect(accessRequest({ ...user, role: 'security' }, door)).toBe(true);
   });
 
-  test('unavailable -> 403', () => {
-    expect(loanRequest(student, { ...book, reference: true }))
-      .toStrictEqual({ status: 403, body: { approved: false, reason: 'UNAVAILABLE' } });
+  test('student in their own building during the day', () => {
+    expect(accessRequest(user, { ...door, building: 'K17' })).toBe(true);
   });
 
-  test('staff, normal item -> 200 with doubled days', () => {
-    expect(loanRequest({ ...student, type: 'staff' }, book))
-      .toStrictEqual({ status: 200, body: { approved: true, days: 28 } });
+  test('student with a booking for the room', () => {
+    expect(accessRequest({ ...user, bookings: ['G02'] }, door)).toBe(true);
+  });
+
+  test('student with nothing special', () => {
+    expect(accessRequest(user, door)).toBe(false);
   });
 });

@@ -1,12 +1,13 @@
-export interface Student {
-  enrolled: boolean,
-  specialConsideration: boolean,
+export interface Customer {
+  tier: 'standard' | 'gold' | 'staff',
+  flagged: string[],
+  warranties: string[],
 }
 
-export interface Assessment {
-  rawMark: number,
-  examMark: number,
-  daysLate: number,
-  hurdle: boolean,
-  plagiarism: boolean,
+export interface Order {
+  status: 'delivered' | 'cancelled',
+  category: string,
+  faulty: boolean,
+  hasReceipt: boolean,
+  daysSincePurchase: number,
 }

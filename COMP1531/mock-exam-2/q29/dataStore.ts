@@ -5,38 +5,30 @@ export interface ErrorObject {
   message: string,
 }
 
-export type Location = 'Library' | 'Quad' | 'K17';
+export type Genre = 'Fiction' | 'Science' | 'History';
 
-export interface ItemId {
-  itemId: number,
+export interface BooksReturn {
+  books: Book[]
 }
 
-export interface Item extends ItemId {
-  description: string,
-  location: Location,
-  claimedBy: string | null,
+export interface BookId {
+  bookId: number,
 }
 
-export interface ItemReturn {
-  item: Item
+export interface Book {
+  title: string,
+  genre: Genre,
+  copies: number
 }
 
-export interface ItemsReturn {
-  items: Item[]
-}
-
-export interface RemovedReturn {
-  removed: number
-}
+export interface BookDataStore extends BookId, Book {}
 
 export interface DataStore {
-  items: Item[],
-  nextItemId: number,
+  books: BookDataStore[]
 }
 
 const dataStore: DataStore = {
-  items: [],
-  nextItemId: 0,
+  books: []
 };
 
 export const getData = (): DataStore => dataStore;

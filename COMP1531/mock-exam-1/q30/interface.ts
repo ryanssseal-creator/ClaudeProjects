@@ -1,12 +1,12 @@
-export interface Customer {
-  age: number,
-  student: boolean,
-  member: boolean,
+export interface Guest {
+  name: string,
+  status: 'regular' | 'member' | 'banned',
+  ticket: 'general' | 'vip' | 'none',
 }
 
-export interface Session {
-  basePrice: number,
-  day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday',
-  format: '2d' | '3d',
-  soldOut: boolean,
+export interface Venue {
+  blocked: string[],
+  hosts: string[],
+  guestList: string[],
+  membersNight: boolean,
 }

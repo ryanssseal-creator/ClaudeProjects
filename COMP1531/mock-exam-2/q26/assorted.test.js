@@ -1,99 +1,78 @@
 import { describe, test, expect } from 'vitest';
 import {
   intersection,
-  rotate,
+  flatten,
   invert,
-  toCamelCase,
+  initials,
 } from './assorted';
 
 describe('intersection', () => {
-  test('returns the common elements', () => {
-    expect(intersection([1, 2, 3], [2, 3, 4])).toStrictEqual([2, 3]);
+  test('returns all elements if all overlap', () => {
+    expect(intersection([1, 2, 3], [1, 2, 3])).toEqual([1, 2, 3]);
   });
 
-  test('keeps the order of the first array', () => {
-    expect(intersection([3, 1, 2], [1, 2, 3])).toStrictEqual([3, 1, 2]);
+  test('returns common elements if some overlap', () => {
+    expect(intersection([1, 2, 3], [2, 3, 4])).toEqual([2, 3]);
   });
 
-  test('does not repeat elements', () => {
-    expect(intersection([1, 2, 2, 3], [3, 2, 4])).toStrictEqual([2, 3]);
-  });
-
-  test('returns empty when nothing is shared', () => {
-    expect(intersection([1, 2], [3, 4])).toStrictEqual([]);
+  test('returns empty if no common elements', () => {
+    expect(intersection([1, 2], [3, 4])).toEqual([]);
   });
 
   test('works with empty arrays', () => {
-    expect(intersection([], [1, 2])).toStrictEqual([]);
-    expect(intersection([1, 2], [])).toStrictEqual([]);
+    expect(intersection([], [1, 2])).toEqual([]);
+    expect(intersection([], [])).toEqual([]);
   });
 });
 
-describe('rotate', () => {
-  test('shifts elements right and wraps around', () => {
-    expect(rotate([1, 2, 3, 4, 5], 2)).toStrictEqual([4, 5, 1, 2, 3]);
-    expect(rotate([1, 2, 3], 1)).toStrictEqual([3, 1, 2]);
+describe('flatten', () => {
+  test('joins the inner arrays in order', () => {
+    expect(flatten([[1, 2], [3, 4]])).toEqual([1, 2, 3, 4]);
+    expect(flatten([[1, 2], [3], [4, 5]])).toEqual([1, 2, 3, 4, 5]);
   });
 
-  test('rotating by 0 gives an equal array', () => {
-    expect(rotate([1, 2, 3], 0)).toStrictEqual([1, 2, 3]);
+  test('returns empty array for empty input', () => {
+    expect(flatten([])).toEqual([]);
   });
 
-  test('rotating by the length gives an equal array', () => {
-    expect(rotate([1, 2, 3], 3)).toStrictEqual([1, 2, 3]);
+  test('handles empty inner arrays', () => {
+    expect(flatten([[], [1], []])).toEqual([1]);
   });
 
-  test('handles k larger than the length', () => {
-    expect(rotate([1, 2, 3], 7)).toStrictEqual([3, 1, 2]);
-  });
-
-  test('handles an empty array', () => {
-    expect(rotate([], 4)).toStrictEqual([]);
-  });
-
-  test('does not modify the input', () => {
-    const input = [1, 2, 3];
-    rotate(input, 1);
-    expect(input).toStrictEqual([1, 2, 3]);
+  test('handles a single inner array', () => {
+    expect(flatten([[1, 2, 3]])).toEqual([1, 2, 3]);
   });
 });
 
 describe('invert', () => {
   test('swaps keys and values', () => {
-    expect(invert({ a: 'x', b: 'y' })).toStrictEqual({ x: 'a', y: 'b' });
+    expect(invert({ a: 'x', b: 'y' })).toEqual({ x: 'a', y: 'b' });
   });
 
-  test('works with number values', () => {
-    expect(invert({ one: 1, two: 2 })).toStrictEqual({ 1: 'one', 2: 'two' });
+  test('works with a single key', () => {
+    expect(invert({ name: 'ryan' })).toEqual({ ryan: 'name' });
   });
 
-  test('works with an empty object', () => {
-    expect(invert({})).toStrictEqual({});
-  });
-
-  test('does not modify the input', () => {
-    const input = { a: 'x' };
-    invert(input);
-    expect(input).toStrictEqual({ a: 'x' });
+  test('works with empty object', () => {
+    expect(invert({})).toEqual({});
   });
 });
 
-describe('toCamelCase', () => {
-  test('joins words, capitalising all but the first', () => {
-    expect(toCamelCase('hello big world')).toBe('helloBigWorld');
+describe('initials', () => {
+  test('single word', () => {
+    expect(initials('hello')).toBe('H');
   });
 
-  test('a single word is lower-cased', () => {
-    expect(toCamelCase('hello')).toBe('hello');
-    expect(toCamelCase('Hello')).toBe('hello');
-  });
-
-  test('normalises existing capitalisation', () => {
-    expect(toCamelCase('Hello World')).toBe('helloWorld');
-    expect(toCamelCase('JAVA script IS fun')).toBe('javaScriptIsFun');
+  test('multiple words', () => {
+    expect(initials('hello big world')).toBe('HBW');
+    expect(initials('a quick brown fox')).toBe('AQBF');
   });
 
   test('handles empty string', () => {
-    expect(toCamelCase('')).toBe('');
+    expect(initials('')).toBe('');
+  });
+
+  test('words that already start with a capital', () => {
+    expect(initials('University of New South Wales')).toBe('UONSW');
   });
 });

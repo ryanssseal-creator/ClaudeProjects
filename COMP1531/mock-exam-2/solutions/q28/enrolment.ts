@@ -1,46 +1,22 @@
 // SOLUTION - Mock Exam 2, Q28
 
 export interface Enrolment {
-  zid: string;
+  zid: number;
   request: {
-    courses?: string[];
-    term?: number;
-    overloadApproved?: boolean;
+    uoc?: number;
+    feesPaid?: true;
+    prerequisitesMet?: true;
+    termConfirmed?: true;
+    wam?: number;
   }
 }
 
-const ZID_LENGTH = 8;
-const COURSE_CODE_LENGTH = 8;
-const VALID_TERMS = [1, 2, 3];
-const MAX_COURSES = 3;
+const MAX_UOC = 18;
+const MIN_WAM = 50;
+const ZID_DIGITS = 7;
 
-// Already in alphabetical order, so the missing list comes out sorted.
-const REQUIRED_FIELDS = ['courses', 'overloadApproved', 'term'] as const;
-
-// Helpers. With a regular expression these are one-liners:
-//   /^z\d{7}$/.test(zid)        /^[A-Z]{4}\d{4}$/.test(code)
-// but plain string methods work just as well and are easier to get right under pressure.
-const DIGITS = '0123456789';
-const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-function onlyContains(str: string, allowed: string): boolean {
-  for (const char of str) {
-    if (!allowed.includes(char)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function isValidZid(zid: string): boolean {
-  return zid.length === ZID_LENGTH && zid[0] === 'z' && onlyContains(zid.slice(1), DIGITS);
-}
-
-function isValidCourseCode(code: string): boolean {
-  return code.length === COURSE_CODE_LENGTH &&
-    onlyContains(code.slice(0, 4), UPPER) &&
-    onlyContains(code.slice(4), DIGITS);
-}
+// Listed in alphabetical order, so the missing list comes out sorted.
+const REQUIRED_FIELDS = ['feesPaid', 'prerequisitesMet', 'termConfirmed', 'uoc', 'wam'] as const;
 
 /**
  * Validates a single enrolment request against specific criteria.
@@ -48,44 +24,32 @@ function isValidCourseCode(code: string): boolean {
 export function validateEnrolment(enrolment: Enrolment): string {
   const request = enrolment.request;
 
-  // 1. Missing fields. Compare with undefined: `!request.term` would wrongly call
-  //    term 0 "missing", and `!request.overloadApproved` would do the same for false.
+  // Missing fields first: the other checks need the fields to exist.
   const missing = REQUIRED_FIELDS.filter(field => request[field] === undefined);
   if (missing.length > 0) {
+    // ['uoc', 'wam'] -> "'uoc', 'wam'"
     const list = missing.map(field => `'${field}'`).join(', ');
-    throw new Error(`Incomplete enrolment. Missing field/s: ${list}.`);
+    // The spec says THROWN errors: `throw new Error(...)`, not `return '...'`.
+    throw new Error(`Incomplete enrolment. Missing field/s; ${list}.`);
   }
 
-  // After check 1 we know these exist, so the casts are safe.
-  const courses = request.courses as string[];
-  const term = request.term as number;
-
-  // 2. zID
-  if (!isValidZid(enrolment.zid)) {
-    throw new Error(`zID '${enrolment.zid}' is invalid.`);
+  // Turn the number into a string to count its digits.
+  if (String(enrolment.zid).length !== ZID_DIGITS) {
+    throw new Error(`Provided zid '${enrolment.zid}' not in range.`);
   }
 
-  // 3. Term
-  if (!VALID_TERMS.includes(term)) {
-    throw new Error(`Term '${term}' does not exist.`);
+  // We know these exist after the missing check, so the casts are safe.
+  const uoc = request.uoc as number;
+  const wam = request.wam as number;
+
+  if (uoc > MAX_UOC) {
+    throw new Error('Student is overloading.');
   }
 
-  // 4. No courses
-  if (courses.length === 0) {
-    throw new Error('No courses selected.');
+  if (wam < MIN_WAM) {
+    // The quotes go around the number: '49'
+    throw new Error(`WAM of '${wam}' insufficient.`);
   }
 
-  // 5. Course codes: the loop stops at the first invalid one because throw exits the function.
-  for (const code of courses) {
-    if (!isValidCourseCode(code)) {
-      throw new Error(`Course code '${code}' is invalid.`);
-    }
-  }
-
-  // 6. Overload
-  if (courses.length > MAX_COURSES && !request.overloadApproved) {
-    throw new Error(`Enrolling in '${courses.length}' courses requires overload approval.`);
-  }
-
-  return 'Enrolment valid. Proceed to timetable.';
+  return 'Enrolment in correct format. Proceed to timetable.';
 }

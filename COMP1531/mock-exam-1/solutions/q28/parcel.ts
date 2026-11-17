@@ -1,23 +1,22 @@
 // SOLUTION - Mock Exam 1, Q28
 
 export interface Parcel {
-  trackingId: string;
+  trackingId: number;
   details: {
     weightKg?: number;
-    destinationPostcode?: number;
-    senderName?: string;
-    fragile?: boolean;
+    addressVerified?: true;
+    senderVerified?: true;
+    postagePaid?: true;
     declaredValue?: number;
   }
 }
 
-const TRACKING_LENGTH = 10;
 const MAX_WEIGHT = 22;
-const MIN_POSTCODE = 1000;
-const MAX_POSTCODE = 9999;
+const MAX_VALUE = 5000;
+const TRACKING_DIGITS = 8;
 
-// Already in alphabetical order, so the missing list comes out sorted.
-const REQUIRED_FIELDS = ['declaredValue', 'destinationPostcode', 'fragile', 'senderName', 'weightKg'] as const;
+// Listed in alphabetical order, so the missing list comes out sorted.
+const REQUIRED_FIELDS = ['addressVerified', 'declaredValue', 'postagePaid', 'senderVerified', 'weightKg'] as const;
 
 /**
  * Validates a single parcel booking against specific criteria.
@@ -25,38 +24,32 @@ const REQUIRED_FIELDS = ['declaredValue', 'destinationPostcode', 'fragile', 'sen
 export function validateParcel(parcel: Parcel): string {
   const details = parcel.details;
 
-  // 1. Missing fields.
-  //    Compare with undefined. `!details.fragile` would wrongly treat false (and 0) as missing.
+  // Missing fields first: the other checks need the fields to exist.
   const missing = REQUIRED_FIELDS.filter(field => details[field] === undefined);
   if (missing.length > 0) {
+    // ['a', 'b'] -> "'a', 'b'"
     const list = missing.map(field => `'${field}'`).join(', ');
     // The spec says THROWN errors: `throw new Error(...)`, not `return '...'`.
-    throw new Error(`Incomplete parcel. Missing field/s: ${list}.`);
+    throw new Error(`Incomplete parcel. Missing field/s; ${list}.`);
   }
 
-  // 2. Tracking ID
-  if (parcel.trackingId.length !== TRACKING_LENGTH || !parcel.trackingId.startsWith('AU')) {
-    throw new Error(`Tracking ID '${parcel.trackingId}' is invalid.`);
+  // Turn the number into a string to count its digits.
+  if (String(parcel.trackingId).length !== TRACKING_DIGITS) {
+    throw new Error(`Provided trackingId '${parcel.trackingId}' not in range.`);
   }
 
-  // After check 1 we know these exist, so the casts are safe.
+  // We know these exist after the missing check, so the casts are safe.
   const weight = details.weightKg as number;
-  const postcode = details.destinationPostcode as number;
+  const value = details.declaredValue as number;
 
-  // 3. Weight
-  if (weight <= 0 || weight > MAX_WEIGHT) {
-    throw new Error(`Weight of '${weight}'kg is out of range.`);
+  if (weight > MAX_WEIGHT) {
+    throw new Error('Parcel is overweight.');
   }
 
-  // 4. Postcode
-  if (postcode < MIN_POSTCODE || postcode > MAX_POSTCODE) {
-    throw new Error(`Postcode '${postcode}' is invalid.`);
+  if (value > MAX_VALUE) {
+    // The quotes go around the number: '6000'
+    throw new Error(`Declared value of '${value}' too high.`);
   }
 
-  // 5. Fragile
-  if (details.fragile && details.declaredValue === 0) {
-    throw new Error('Fragile parcels must declare a value.');
-  }
-
-  return 'Parcel accepted. Ready for dispatch.';
+  return 'Parcel in correct format. Proceed to dispatch.';
 }

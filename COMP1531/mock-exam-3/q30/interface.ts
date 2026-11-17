@@ -1,22 +1,14 @@
-export interface Loan {
-  title: string,
-  overdue: boolean,
+export interface User {
+  zid: string,
+  role: 'student' | 'staff' | 'security' | 'visitor',
+  building: string,
+  bookings: string[],
 }
 
-export interface Member {
-  type: 'student' | 'staff',
-  suspended: boolean,
-  loans: Loan[],
-}
-
-export interface Item {
-  reference: boolean,
-  copiesAvailable: number,
-  highDemand: boolean,
-}
-
-export interface Decision {
-  approved: boolean,
-  reason?: string,
-  days?: number,
+export interface Door {
+  room: string,
+  building: string,
+  locked: boolean,
+  owners: string[],
+  afterHours: boolean,
 }

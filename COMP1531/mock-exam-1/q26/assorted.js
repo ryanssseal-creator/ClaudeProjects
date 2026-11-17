@@ -12,15 +12,7 @@
  * unique([3, 1, 3, 2, 1]) // => [3, 1, 2]
  */
 export function unique(arr) {
-  const seen = [];
-  // 'in' uses index, 'of' uses the number itself.
-  for (const number of arr) {
-    if (!seen.includes(number)) {
-      seen.push(number);
-    }
-  }
-
-  return seen;
+  // TODO
 }
 
 /**
@@ -33,17 +25,7 @@ export function unique(arr) {
  * countOccurrences(['a', 'b', 'a']) // => { a: 2, b: 1 }
  */
 export function countOccurrences(arr) {
-  const result = {};
-  for (const key of arr) {
-    if (result[key] === undefined) {
-      result[key] = 1;
-    } else {
-      result[key]++;
-    }
-  }
-
-
-  return result;
+  // TODO
 }
 
 /**
@@ -59,14 +41,7 @@ export function countOccurrences(arr) {
  * pick({ a: 1, b: 2, c: 3 }, ['a', 'c']) // => { a: 1, c: 3 }
  */
 export function pick(obj, keys) {
-  const result = {};
-  for (const key of keys) {
-    if (!(obj[key] === undefined)) {
-      result[key] = obj[key];
-    }
-  }
-
-  return result;
+  // TODO
 }
 
 /**
@@ -80,16 +55,5 @@ export function pick(obj, keys) {
  * reverseWords('hello world') // => 'olleh dlrow'
  */
 export function reverseWords(str) {
-  // 1. split all of the words
-  const split = str.split(' ');
-  // Split all of the letters.
-  const reversedArray = [];
-  for (const word of split) {
-    const splitWord = word.split('');
-    const reversedLetters = splitWord.reverse();
-    const reversedWord = reversedLetters.join('');
-    reversedArray.push(reversedWords);
-  }
-
-  return reversedArray.join(' ');
+  // TODO
 }

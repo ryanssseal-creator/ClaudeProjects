@@ -2,7 +2,7 @@ import express, { json, Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import config from './config.json' with { type: "json" };
-import { clear, reportItem, searchItems, getItem, claimItem, removeItem, removeClaimed } from './lostFound.ts';
+import { clear, addNewBook, getBooksByGenre, getBooksByIds, updateBookCopiesById, updateAllBookCopies } from './books.ts';
 
 const PORT: number = parseInt(process.env.PORT || config.port);
 const HOST: string = process.env.IP || '127.0.0.1';
@@ -24,7 +24,7 @@ app.delete('/clear', (req: Request, res: Response) => {
   res.json(clear());
 });
 
-// TODO: implement the SIX remaining routes given in spec/q29.md
+// TODO: implement the FIVE remaining routes given in spec/q29.md
 
 // ========================================================================= //
 // YOUR ROUTES SHOULD BE DEFINED ABOVE THIS DIVIDER

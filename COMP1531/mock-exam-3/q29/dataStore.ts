@@ -5,40 +5,30 @@ export interface ErrorObject {
   message: string,
 }
 
-export interface NoteId {
-  noteId: number,
+export type PlantSize = 'Small' | 'Medium' | 'Large';
+
+export interface PlantsReturn {
+  plants: Plant[]
 }
 
-export interface NoteSummary extends NoteId {
-  title: string,
-  pinned: boolean,
+export interface PlantId {
+  plantId: number,
 }
 
-export interface Note extends NoteSummary {
-  body: string,
+export interface Plant {
+  name: string,
+  size: PlantSize,
+  price: number
 }
 
-export interface NoteReturn {
-  note: Note
-}
-
-export interface NotesReturn {
-  notes: NoteSummary[]
-}
-
-export interface StatsReturn {
-  total: number,
-  pinned: number,
-}
+export interface PlantDataStore extends PlantId, Plant {}
 
 export interface DataStore {
-  notes: Note[],
-  nextNoteId: number,
+  plants: PlantDataStore[]
 }
 
 const dataStore: DataStore = {
-  notes: [],
-  nextNoteId: 0,
+  plants: []
 };
 
 export const getData = (): DataStore => dataStore;

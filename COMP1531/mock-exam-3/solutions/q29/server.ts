@@ -2,7 +2,7 @@ import express, { json, Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import config from './config.json' with { type: "json" };
-import { clear, createNote, listNotes, getStats, getNote, setPinned, deleteNote } from './notes.ts';
+import { clear, addNewPlant, getPlantsByPrice, getPlantsByIds, updatePlantPriceById, discountAllPlantPrices } from './plants.ts';
 
 const PORT: number = parseInt(process.env.PORT || config.port);
 const HOST: string = process.env.IP || '127.0.0.1';
@@ -22,77 +22,76 @@ app.use(morgan('dev'));
 
 // SOLUTION - Mock Exam 3, Q29
 //
-// Every route: 1. read + convert inputs, 2. call the backend, 3. send error or result.
-// Step 3 is identical everywhere, so it lives in one helper (DRY).
-
-function statusFor(error: string): number {
-  if (error === 'UNAUTHORISED') {
-    return 401; // we don't know who you are
-  }
-  if (error === 'FORBIDDEN') {
-    return 403; // we know who you are, and you're not allowed
-  }
-  return 400; // anything else is bad input
-}
-
-function respond(res: Response, result: object) {
-  if ('error' in result) {
-    return res.status(statusFor(result.error as string)).json(result);
-  }
-  res.json(result);
-}
+// The pattern for every route is the same three steps:
+//   1. pull the inputs out of the request (body / query / params / headers), converting types
+//   2. call the backend function
+//   3. if it returned an error, send it with the right status code; otherwise send the result
 
 app.delete('/clear', (req: Request, res: Response) => {
   res.json(clear());
 });
 
-app.post('/note', (req: Request, res: Response) => {
-  // Header names are always lower case in req.headers.
-  const apiKey = req.headers.apikey as string;
-  const { title, body } = req.body;
+app.post('/plant/add', (req: Request, res: Response) => {
+  const { name, size, price } = req.body;
 
-  respond(res, createNote(apiKey, title, body));
+  const result = addNewPlant(name, size, price);
+  if ('error' in result) {
+    // Send the backend's error object straight through.
+    return res.status(400).json(result);
+  }
+  res.json(result);
 });
 
-app.get('/notes', (req: Request, res: Response) => {
-  const apiKey = req.headers.apikey as string;
-  // Query values are strings. The string 'false' is truthy, so passing it straight
-  // through would act like true. Compare with the string 'true' to get a real boolean.
-  const pinnedOnly = req.query.pinned === 'true';
+app.get('/plant/filter', (req: Request, res: Response) => {
+  // GET requests have no body. The data is in the query string, and it is always
+  // a string, so turn it into a number.
+  const price = parseFloat(req.query.price as string);
 
-  respond(res, listNotes(apiKey, pinnedOnly));
+  const result = getPlantsByPrice(price);
+  if ('error' in result) {
+    return res.status(400).json(result);
+  }
+  res.json(result);
 });
 
-// ORDER MATTERS: '/note/stats' must be registered BEFORE '/note/:noteid',
-// otherwise Express treats the word 'stats' as a noteid.
-app.get('/note/stats', (req: Request, res: Response) => {
-  const apiKey = req.headers.apikey as string;
+app.get('/plant/list', (req: Request, res: Response) => {
+  // '0,2,1' -> ['0', '2', '1'] -> [0, 2, 1]
+  const plantIds = (req.query.plantIds as string).split(',').map(id => parseInt(id));
 
-  respond(res, getStats(apiKey));
+  const result = getPlantsByIds(plantIds);
+  if ('error' in result) {
+    return res.status(400).json(result);
+  }
+  res.json(result);
 });
 
-app.get('/note/:noteid', (req: Request, res: Response) => {
-  const apiKey = req.headers.apikey as string;
-  // Path parameters are strings. The backend compares ids with ===, so convert.
-  const noteId = parseInt(req.params.noteid as string);
+// ORDER MATTERS: this must be registered BEFORE '/plant/:plantid'.
+// Express uses the first route that matches, and ':plantid' matches the word 'all'.
+app.put('/plant/all', (req: Request, res: Response) => {
+  const role = req.headers.role as string;
+  const { discountAmount } = req.body;
 
-  respond(res, getNote(apiKey, noteId));
+  const result = discountAllPlantPrices(role, discountAmount);
+  if ('error' in result) {
+    // Wrong role is a permissions problem (403), everything else is bad input (400).
+    const status = result.error === 'INVALID_ROLE' ? 403 : 400;
+    return res.status(status).json(result);
+  }
+  res.json(result);
 });
 
-app.put('/note/:noteid/pin', (req: Request, res: Response) => {
-  const apiKey = req.headers.apikey as string;
-  const noteId = parseInt(req.params.noteid as string);
-  // JSON bodies keep their types, so this is already a real boolean.
-  const { pinned } = req.body;
+app.put('/plant/:plantid', (req: Request, res: Response) => {
+  const role = req.headers.role as string;
+  // Path parameters are strings too.
+  const plantId = parseInt(req.params.plantid as string);
+  const { price } = req.body;
 
-  respond(res, setPinned(apiKey, noteId, pinned));
-});
-
-app.delete('/note/:noteid', (req: Request, res: Response) => {
-  const apiKey = req.headers.apikey as string;
-  const noteId = parseInt(req.params.noteid as string);
-
-  respond(res, deleteNote(apiKey, noteId));
+  const result = updatePlantPriceById(role, plantId, price);
+  if ('error' in result) {
+    const status = result.error === 'INVALID_ROLE' ? 403 : 400;
+    return res.status(status).json(result);
+  }
+  res.json(result);
 });
 
 // ========================================================================= //

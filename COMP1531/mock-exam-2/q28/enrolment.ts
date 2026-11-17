@@ -1,9 +1,11 @@
 export interface Enrolment {
-  zid: string;
+  zid: number;
   request: {
-    courses?: string[];
-    term?: number;
-    overloadApproved?: boolean;
+    uoc?: number;
+    feesPaid?: true;
+    prerequisitesMet?: true;
+    termConfirmed?: true;
+    wam?: number;
   }
 }
 
@@ -12,5 +14,5 @@ export interface Enrolment {
  */
 export function validateEnrolment(enrolment: Enrolment) {
   // TODO: complete me
-  return 'Enrolment valid. Proceed to timetable.';
+  return 'Enrolment in correct format. Proceed to timetable.';
 }

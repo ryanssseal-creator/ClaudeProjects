@@ -37,9 +37,9 @@ Only these files are collected. Everything else is replaced with the original be
 | Theory | `q21.md` `q22.md` `q23.md` `q24.md` `q25.md` |
 | Q26 | `q26/assorted.js` |
 | Q27 | `q27/cart.ts` |
-| Q28 | `q28/signup.ts` |
+| Q28 | `q28/licence.ts` |
 | Q29 | `q29/server.ts` |
-| Q30 | `q30/loans.test.ts` `q30/server.test.ts` |
+| Q30 | `q30/access.test.ts` `q30/server.test.ts` |
 | Q31 | `q31/design.md` |
 
 ## Setup

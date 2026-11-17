@@ -13,7 +13,20 @@
  * chunk([1, 2, 3, 4, 5], 2) // => [[1, 2], [3, 4], [5]]
  */
 export function chunk(arr, size) {
-  // TODO
+  // const copy = arr
+  const copy = arr.slice();
+  const result = [];
+
+  while (copy.length > 0) {
+    const chunk = [];
+    while (chunk.length < size && copy.length > 0) {
+      const temp = copy.shift();
+      chunk.push(temp);
+    }
+    result.push(chunk);
+  }
+
+  return result;
 }
 
 /**
@@ -28,7 +41,22 @@ export function chunk(arr, size) {
  * countWords('the cat and The dog') // => { the: 2, cat: 1, and: 1, dog: 1 }
  */
 export function countWords(str) {
-  // TODO
+  const result = {};
+  const lowerCase = str.toLowerCase();
+  const words = lowerCase.split(" ");
+
+  for (const word of words) {
+    if (!word) {
+      break;
+    }
+    if (!Object.keys(result).includes(word)) {
+      result[word] = 1;
+    } else {
+      result[word]++;
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -43,7 +71,10 @@ export function countWords(str) {
  * isPalindrome('Never odd, or even!') // => true
  */
 export function isPalindrome(str) {
-  // TODO
+  const cleaned = str.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
+  const reversed = cleaned.split('').reverse().join('');
+
+  return reversed === cleaned;
 }
 
 /**
@@ -59,5 +90,11 @@ export function isPalindrome(str) {
  * zip([1, 2, 3], ['a', 'b']) // => [[1, 'a'], [2, 'b']]
  */
 export function zip(a, b) {
-  // TODO
+  const length = Math.min(a.length, b.length);
+  const result = [];
+  for (let i = 0; i < length; i++) {
+    result.push([a[i], b[i]]);
+  }
+
+  return result;
 }

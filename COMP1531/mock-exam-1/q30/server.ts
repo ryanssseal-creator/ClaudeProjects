@@ -3,7 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import config from './config.json' with { type: "json" };
-import { ticketPrice } from './cinema.ts';
+import { entryService } from './entry.ts';
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -18,15 +18,11 @@ app.use(morgan('dev'));
 
 ///////////////////////////////////////////////////////////////////////////////
 
-app.post('/cinema/price', (req: Request, res: Response) => {
-  const { customer, session } = req.body;
+app.post('/events/entry', (req: Request, res: Response) => {
+  const { guest, venue } = req.body;
+  const result = entryService(guest, venue);
 
-  try {
-    const price = ticketPrice(customer, session);
-    res.json({ price });
-  } catch (err) {
-    res.status(400).json({ error: (err as Error).message });
-  }
+  res.json(result);
 });
 
 ///////////////////////////////////////////////////////////////////////////////

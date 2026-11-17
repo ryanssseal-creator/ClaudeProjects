@@ -2,49 +2,44 @@
 
 export function sumBy(arr, key) {
   let total = 0;
+  // `of` gives each object. `in` would give the indices as strings.
   for (const obj of arr) {
     // obj[key], not obj.key: we want the property whose NAME is stored in `key`.
-    if (obj[key] !== undefined) {
-      total += obj[key];
-    }
+    total += obj[key];
   }
   return total;
 }
 
-export function partition(arr, predicate) {
-  const pass = [];
-  const fail = [];
-  for (const item of arr) {
-    // predicate is just a variable holding a function, so call it like any function.
-    if (predicate(item)) {
-      pass.push(item);
-    } else {
-      fail.push(item);
-    }
+export function lastN(arr, n) {
+  const result = [];
+  // Start n places from the end, but never before index 0.
+  let start = arr.length - n;
+  if (start < 0) {
+    start = 0;
   }
-  return [pass, fail];
+  for (let i = start; i < arr.length; i++) {
+    result.push(arr[i]);
+  }
+  return result;
+  // One-liner alternative: return arr.slice(start);
 }
 
-export function mergeCounts(a, b) {
-  // Start from a COPY of a. `const result = a` would be the same object, so
-  // changing result would change the caller's a.
-  const result = { ...a };
-  for (const [key, value] of Object.entries(b)) {
-    if (result[key] === undefined) {
-      result[key] = value;
+export function renameKey(obj, oldKey, newKey) {
+  const result = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === oldKey) {
+      // Square brackets: use the VALUE stored in newKey as the key name.
+      result[newKey] = value;
     } else {
-      result[key] += value;
+      result[key] = value;
     }
   }
   return result;
 }
 
-export function isAnagram(a, b) {
-  // Two strings are anagrams exactly when their sorted letters are identical.
-  const normalise = (str) => {
-    const letters = str.toLowerCase().split('').filter(char => char !== ' ');
-    // split() made a brand new array, so sorting it does not touch the input.
-    return letters.sort().join('');
-  };
-  return normalise(a) === normalise(b);
+export function isPalindrome(str) {
+  const lower = str.toLowerCase();
+  // split('') makes a new array of letters, so reversing it doesn't touch the string.
+  const reversed = lower.split('').reverse().join('');
+  return lower === reversed;
 }

@@ -1,4 +1,16 @@
-let books = [];
+interface BookType {
+  bookId: number;
+  title: string;
+  author: string;
+  borrower: string | null;
+  year?: number;
+};
+
+interface ErrorResponse {
+  error: string;
+};
+
+let books: BookType[] = [];
 let nextId = 1;
 
 /**
@@ -9,17 +21,17 @@ let nextId = 1;
  * @returns {bookId Object} - returns the bookId as the number in the object,
  * or an error object that includes error(string).
  */
-export function addBook(title: number, author, year: string): number {
-  if (title.length == 0 || author.length == 0) {
-    return { error: "Title and author are required" };
+export function addBook(title: string, author: string, year?: number): { bookId: number } | ErrorResponse {
+  if (title.length === 0 || author.length === 0) {
+    return { error: 'Title and author are required' };
   }
 
-  let book = {
+  const book: BookType = {
     bookId: nextId,
     title: title,
     author: author,
     borrower: null,
-  }
+  };
   if (year !== undefined) {
     book.year = year;
   }
@@ -35,13 +47,13 @@ export function addBook(title: number, author, year: string): number {
  * @returns {} - empty object, or an error object that includes error(string)
  * if the bookId is invalid or the book is already borrowed.
  */
-export function borrowBook(bookId: string, borrower) {
-  const book = books.find((b) => b.bookId == bookId);
+export function borrowBook(bookId: number, borrower: string): Record<string, never> | ErrorResponse {
+  const book = books.find(b => b.bookId === bookId);
   if (book === undefined) {
     return { error: 'Invalid bookId' };
   }
   if (book.borrower !== null) {
-    return { error: "Book is already borrowed" };
+    return { error: 'Book is already borrowed' };
   }
   book.borrower = borrower;
   return {};
@@ -54,23 +66,23 @@ export function borrowBook(bookId: string, borrower) {
  * Each book object includes bookId(number), title(string), author(string),
  * borrower(string, or null if not borrowed) and, if one was given, year(number).
  */
-export function getBooksByAuthor(author: number): Book[] {
-  return { books: books.filter((b) => b.author === author) };
-}
+export function getBooksByAuthor(author: string): { books: BookType[] } {
+  return { books: books.filter(b => b.author === author) };
+};
 
 /**
  * Count the books that are not currently borrowed.
  * @returns {number} - how many books are available
  */
-export function countAvailable(): string {
-  return books.filter((b) => b.borrower === null).length
-}
+export function countAvailable(): number {
+  return books.filter(b => b.borrower === null).length;
+};
 
 /**
  * Clear the library.
  * @returns {}
  */
-export function clear() {
+export function clear(): Record<string, never> {
   books = [];
   nextId = 1;
   return {};

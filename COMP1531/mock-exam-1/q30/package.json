@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "tsx": "tsx",
-    "test-unit": "vitest run --coverage cinema.test.ts",
+    "test-unit": "vitest run --coverage entry.test.ts",
     "start": "tsx server.ts",
     "start-coverage": "c8 --reporter=text --reporter=lcov tsx server.ts",
     "test-server": "vitest run server.test.ts",

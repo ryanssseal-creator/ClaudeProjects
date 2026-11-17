@@ -1,42 +1,34 @@
 // DO NOT MODIFY THE FUNCTION DEFINITIONS
 
 /**
- * Returns an array of the elements that exist in both input arrays.
- * Elements appear in the same order as in the first array, and each
- * element appears at most once in the result.
+ * Returns an array containing the elements that exist in both input arrays.
  *
  * @param {any[]} a - First array.
  * @param {any[]} b - Second array.
  * @returns {any[]} - Array of elements in both a and b.
  *
  * @example
- * intersection([1, 2, 2, 3], [3, 2, 4]) // => [2, 3]
+ * intersection([1, 2, 3], [2, 3, 4]) // => [2, 3]
  */
 export function intersection(a, b) {
   // TODO
 }
 
 /**
- * Returns a copy of an array with every element shifted to the right by
- * k positions. Elements that fall off the end wrap around to the front.
- * k is a non-negative integer and may be larger than the array's length.
- * The input array is not modified.
+ * Flattens an array of arrays into a single array.
  *
- * @param {any[]} arr - Array to rotate.
- * @param {number} k - Number of positions to shift right by.
- * @returns {any[]} - New rotated array.
+ * @param {any[][]} arr - Array of arrays.
+ * @returns {any[]} - Single array containing all the elements, in order.
  *
  * @example
- * rotate([1, 2, 3, 4, 5], 2) // => [4, 5, 1, 2, 3]
+ * flatten([[1, 2], [3], [4, 5]]) // => [1, 2, 3, 4, 5]
  */
-export function rotate(arr, k) {
+export function flatten(arr) {
   // TODO
 }
 
 /**
- * Creates a new object where the keys and values of the original are swapped.
- * You can assume all values are unique strings or numbers.
- * The original object is not modified.
+ * Creates a copy of an object with its keys and values swapped.
  *
  * @param {Object} obj - Original object.
  * @returns {Object} - New object with keys and values swapped.
@@ -49,16 +41,15 @@ export function invert(obj) {
 }
 
 /**
- * Converts a string of words separated by single spaces into camelCase:
- * the first word is entirely lower case, every later word has its first
- * letter in upper case and the rest in lower case, and the spaces are removed.
+ * Returns the initials of the words in a string: the first letter
+ * of every word, in upper case, joined together.
  *
  * @param {string} str - The input string.
- * @returns {string} - The camelCase string.
+ * @returns {string} - The initials.
  *
  * @example
- * toCamelCase('hello big world') // => 'helloBigWorld'
+ * initials("hello big world") // => "HBW"
  */
-export function toCamelCase(str) {
+export function initials(str) {
   // TODO
 }

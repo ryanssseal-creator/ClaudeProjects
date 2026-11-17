@@ -3,7 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import config from './config.json' with { type: "json" };
-import { loanService } from './loans.ts';
+import { accessService } from './access.ts';
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -18,15 +18,11 @@ app.use(morgan('dev'));
 
 ///////////////////////////////////////////////////////////////////////////////
 
-app.post('/library/loan', (req: Request, res: Response) => {
-  const { member, item } = req.body;
-  const decision = loanService(member, item);
+app.post('/campus/access', (req: Request, res: Response) => {
+  const { user, door } = req.body;
+  const result = accessService(user, door);
 
-  if (!decision.approved) {
-    return res.status(403).json(decision);
-  }
-
-  res.json(decision);
+  res.json(result);
 });
 
 ///////////////////////////////////////////////////////////////////////////////
